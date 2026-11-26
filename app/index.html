@@ -5,6 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>HearthLedger — Household Budget Studio</title>
 <meta name="description" content="HearthLedger is the Alvarez family's household budget studio: income, spending, budgets, bills, savings goals and plain-English insights for November 2026 — all in one place, all offline.">
+<script>
+// Before first paint: restore the saved language and theme (or the
+// system's colour scheme) so the page never flashes the wrong ones.
+(function () {
+  try {
+    var lang = localStorage.getItem("hearthledger-lang-v1");
+    if (lang === "id" || lang === "en") document.documentElement.lang = lang;
+    var theme = localStorage.getItem("hearthledger-theme-v1");
+    if (theme !== "dark" && theme !== "light") {
+      theme = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    document.documentElement.dataset.theme = theme;
+  } catch (e) {
+    document.documentElement.dataset.theme = "light";
+  }
+})();
+</script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,7 +33,7 @@
       <path d="M14 34h20" stroke="#faf6ee" stroke-width="2.4" stroke-linecap="round"/>
       <path d="M17 39h14" stroke="#faf6ee" stroke-width="2.4" stroke-linecap="round"/>
     </svg>
-    <span class="brand-text"><strong>HearthLedger</strong><small>Household Budget Studio</small></span>
+    <span class="brand-text"><strong>HearthLedger</strong><small id="brand-tagline">Household Budget Studio</small></span>
   </a>
   <nav class="mainnav" aria-label="Sections">
     <a href="#/" data-route="dashboard">Dashboard</a>
@@ -26,17 +43,24 @@
     <a href="#/bills" data-route="bills">Bills</a>
     <a href="#/insights" data-route="insights">Insights</a>
   </nav>
-  <div class="household-chip" title="The household this budget tracks">
+  <div class="prefs">
+    <div class="seg" role="group" aria-label="Language">
+      <button type="button" data-lang="en">EN</button>
+      <button type="button" data-lang="id">ID</button>
+    </div>
+    <button type="button" id="theme-toggle" class="theme-btn" aria-label="Switch to dark theme">☾</button>
+  </div>
+  <div class="household-chip" id="household-chip" title="The household this budget tracks">
     <span class="chip-dot" aria-hidden="true"></span>
-    <span><strong>The Alvarez Family</strong><small>November 2026 · 2 adults, 2 kids</small></span>
+    <span><strong>The Alvarez Family</strong><small id="chip-sub">November 2026 · 2 adults, 2 kids</small></span>
   </div>
 </header>
 
 <main id="app" aria-live="polite"></main>
 
 <footer class="sitefoot">
-  <p><strong>HearthLedger</strong> — a household budget studio that runs entirely in your browser. Your figures never leave this device; they are stored only in this browser's local storage, and the <a href="#/insights">Insights</a> page explains every number it shows.</p>
-  <p class="foot-note">Demo household: the Alvarez family, November 2026. Add, edit or delete anything — every control on every page works, and <button type="button" class="linklike" id="reset-demo">reset the demo data</button> any time.</p>
+  <p id="foot-about"></p>
+  <p class="foot-note" id="foot-demo"></p>
 </footer>
 
 <script type="module" src="main.js"></script>

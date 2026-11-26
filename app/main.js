@@ -1,11 +1,15 @@
 // Main — one job: mount the right page for the hash route and wire every
 // control on it. Routes: #/ dashboard, #/transactions, #/budgets,
 // #/goals, #/bills, #/insights. All state lives in state.js; this file
-// only decides what to show and what a click means.
+// only decides what to show and what a click means. It also owns the
+// two header preferences — language (i18n.js) and theme — and repaints
+// the static chrome (nav, footer) whenever the language changes.
 
 import { loadState, saveState, resetState, addTransaction, deleteTransaction, setBudget, addToGoal, toggleBill } from "./state.js";
 import { dashboardView, transactionsView, budgetsView, goalsView, billsView, insightsView } from "./views.js";
+import { t, getLang, setLang } from "./i18n.js";
 
+const THEME_KEY = "hearthledger-theme-v1";
 const app = document.getElementById("app");
 let state = loadState();
 let txFilter = { category: "all", type: "all" };
@@ -25,6 +29,39 @@ function currentRoute() {
   return ROUTES[route] ? route : "";
 }
 
+// The words that live outside the routed pages: title, nav, the
+// household chip and the footer. Rebuilt on every language change.
+function applyChrome() {
+  document.title = t("doc.title");
+  const meta = document.querySelector('meta[name="description"]');
+  if (meta) meta.setAttribute("content", t("doc.description"));
+  document.getElementById("brand-tagline").textContent = t("brand.tagline");
+  document.querySelector(".mainnav").setAttribute("aria-label", t("nav.sections"));
+  document.querySelectorAll(".mainnav a").forEach((a) => {
+    a.textContent = t(`nav.${a.dataset.route}`);
+  });
+  const chip = document.getElementById("household-chip");
+  chip.setAttribute("title", t("chip.title"));
+  document.getElementById("chip-sub").textContent = `${t("chip.month")} · ${t("chip.members")}`;
+  document.getElementById("foot-about").innerHTML =
+    `<strong>HearthLedger</strong>${t("foot.about.pre")}<a href="#/insights">${t("foot.about.link")}</a>${t("foot.about.post")}`;
+  document.getElementById("foot-demo").innerHTML =
+    `${t("foot.demo.pre")}<button type="button" class="linklike" id="reset-demo">${t("foot.demo.reset")}</button>${t("foot.demo.post")}`;
+  document.querySelector(".seg").setAttribute("aria-label", t("prefs.language"));
+  document.querySelectorAll("[data-lang]").forEach((b) => {
+    b.classList.toggle("active", b.dataset.lang === getLang());
+    b.setAttribute("aria-pressed", b.dataset.lang === getLang() ? "true" : "false");
+  });
+  syncThemeButton();
+}
+
+function syncThemeButton() {
+  const dark = document.documentElement.dataset.theme === "dark";
+  const btn = document.getElementById("theme-toggle");
+  btn.textContent = dark ? "☀" : "☾";
+  btn.setAttribute("aria-label", t(dark ? "prefs.toLight" : "prefs.toDark"));
+}
+
 function render() {
   const route = currentRoute();
   const view = ROUTES[route] || dashboardView;
@@ -42,6 +79,26 @@ function rerender() {
   saveState(state);
   render();
 }
+
+// Header preferences: language segmented control + theme toggle.
+document.querySelectorAll("[data-lang]").forEach((button) => {
+  button.addEventListener("click", () => {
+    if (button.dataset.lang === getLang()) return;
+    setLang(button.dataset.lang);
+    applyChrome();
+    render();
+  });
+});
+
+document.getElementById("theme-toggle").addEventListener("click", () => {
+  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  try {
+    localStorage.setItem(THEME_KEY, next);
+  } catch { /* private mode: the theme lasts for the session */ }
+  syncThemeButton();
+  render(); // the donut picks its colours from the active theme
+});
 
 // One delegated handler for every button and select on every page.
 app.addEventListener("click", (event) => {
@@ -110,11 +167,15 @@ app.addEventListener("submit", (event) => {
   rerender();
 });
 
-document.getElementById("reset-demo").addEventListener("click", () => {
+// The reset button lives in the footer, whose words are rebuilt on a
+// language change — so its click is delegated, not bound once.
+document.addEventListener("click", (event) => {
+  if (event.target.id !== "reset-demo") return;
   state = resetState();
   txFilter = { category: "all", type: "all" };
   rerender();
 });
 
 window.addEventListener("hashchange", render);
+applyChrome();
 render();

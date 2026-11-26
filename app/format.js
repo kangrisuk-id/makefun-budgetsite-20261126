@@ -1,10 +1,13 @@
 // Formatting helpers — one job: turn raw numbers and ISO dates into the
 // strings the pages show. All money is USD, whole dollars in summaries,
-// cents in transaction rows.
+// cents in transaction rows. Numbers follow the current language
+// (en-US or id-ID separators) via i18n.js; the currency stays USD.
+
+import { localeTag, monthShort } from "./i18n.js";
 
 export function money(amount, cents = false) {
   const value = Number(amount) || 0;
-  return value.toLocaleString("en-US", {
+  return value.toLocaleString(localeTag(), {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: cents ? 2 : 0,
@@ -24,8 +27,7 @@ export function pct(part, whole) {
 
 export function shortDate(iso) {
   const [y, m, d] = iso.split("-").map(Number);
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  return `${months[m - 1]} ${d}`;
+  return `${monthShort(m - 1)} ${d}`;
 }
 
 export function escapeHtml(text) {

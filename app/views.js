@@ -45,7 +45,7 @@ export function dashboardView(state) {
     .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0)).slice(0, 8);
   const unpaid = state.bills.filter((b) => !b.paid);
   const bars = byCat.slice(0, 5).map((c) =>
-    budgetBar(c.name, c.spent, c.budget, c.spent > c.budget ? "over budget" : "")).join("");
+    budgetBar(c.name, c.spent, c.budget, "")).join("");
 
   return `
   ${head("November, at a glance", `The Alvarez family has <span class="lede-figure num"><strong>${money(left)}</strong> left to budget</span> with ${HOUSEHOLD.daysInMonth - HOUSEHOLD.dayToday} days to go. Income is in, ${money(saved)} is already saved, and every figure below is live — add a transaction and watch it move.`)}
@@ -112,7 +112,7 @@ export function transactionsView(state, filter = { category: "all", type: "all" 
       <div class="field"><label for="f-desc">What was it?</label><input id="f-desc" name="description" type="text" maxlength="80" placeholder="e.g. Weekly grocery run" required></div>
       <div class="field"><label for="f-cat">Category</label><select id="f-cat" name="category">
         ${cats.map((c) => `<option value="${c.id}">${c.name}</option>`).join("")}
-        <option value="savings">Savings (transfer)</option>
+        <option value="savings" disabled>Savings (transfer)</option>
       </select></div>
       <div class="field"><label for="f-amount">Amount ($)</label><input id="f-amount" name="amount" type="number" min="0.01" step="0.01" placeholder="0.00" required></div>
       <div class="field"><label for="f-type">Type</label><select id="f-type" name="type">
@@ -203,7 +203,7 @@ export function goalsView(state) {
   </div>
   <section class="card" style="margin-top:18px">
     <h2>How the goals are funded</h2>
-    <p class="sub" style="margin-bottom:0">November's savings transfers — ${money(savingsTotal(state))} in total — come straight from payday: $600 to the emergency fund and $250 to the holiday fund on Nov 1, then $250 to the car fund on Nov 15. The habit is automatic; the goals page is where you watch it land. See the transfers on the <a href="#/transactions">Transactions</a> page.</p>
+    <p class="sub" style="margin-bottom:0">The balances are cumulative — they hold savings from earlier months as well as November's. November's transfers — ${money(savingsTotal(state))} in total — come straight from payday: $600 to the emergency fund and $250 to the holiday fund on Nov 1, then $250 to the car fund on Nov 15. The habit is automatic; the goals page is where you watch it land. See the transfers on the <a href="#/transactions">Transactions</a> page.</p>
   </section>`;
 }
 
@@ -229,7 +229,7 @@ export function billsView(state) {
   </section>
   <section class="card" style="margin-top:18px">
     <h2>Never miss one again</h2>
-    <p class="sub" style="margin-bottom:0">Five of these bills are on auto-debit, so they pay themselves. The three that need a tap — electric, water and car insurance — are the ones this page exists for: check it on the 1st and the 15th, and the month has no surprises.</p>
+    <p class="sub" style="margin-bottom:0">Five of these bills pay themselves — four by auto-debit and one by card on file. The three that need a tap — electric, water and car insurance — are the ones this page exists for: check it on the 1st and the 15th, and the month has no surprises.</p>
   </section>`;
 }
 

@@ -76,6 +76,16 @@ app.addEventListener("click", (event) => {
 });
 
 app.addEventListener("change", (event) => {
+  // The add-transaction form's type and category must agree: Savings is a
+  // transfer, never an expense or income — an expense filed under Savings
+  // would count in the totals but appear in no chart.
+  if (event.target.id === "f-type") {
+    const catSel = app.querySelector("#f-cat");
+    const savingsOpt = catSel && catSel.querySelector('option[value="savings"]');
+    if (savingsOpt) savingsOpt.disabled = event.target.value !== "saving";
+    if (event.target.value !== "saving" && catSel && catSel.value === "savings") catSel.value = "housing";
+    return;
+  }
   const select = event.target.closest("[data-filter]");
   if (!select) return;
   txFilter[select.dataset.filter] = select.value;
@@ -90,7 +100,10 @@ app.addEventListener("submit", (event) => {
   const description = String(form.get("description") || "").trim();
   const date = String(form.get("date") || "2026-11-26");
   const category = String(form.get("category") || "misc");
-  const type = String(form.get("type") || "expense");
+  // A Savings entry is a transfer by definition, whatever the type menu
+  // said when the form was filled: it can never be an expense or income,
+  // or it would count in the totals but appear in no chart.
+  const type = category === "savings" ? "saving" : String(form.get("type") || "expense");
   if (!description || !Number.isFinite(amount) || amount <= 0) return;
   addTransaction(state, { date, description, category, amount, type });
   txFilter = { category: "all", type: "all" };

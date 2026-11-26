@@ -20,6 +20,8 @@
   --red: #b3402e;
   --red-soft: #fbe7e2;
   --blue: #2f6f8f;
+  --field-bg: #ffffff;
+  --field-line: #cfc4ab;
   --radius: 14px;
   --shadow: 0 1px 2px rgba(34, 48, 42, .06), 0 6px 18px rgba(34, 48, 42, .05);
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
@@ -42,6 +44,7 @@ input, select { font: inherit; }
 .num { font-variant-numeric: tabular-nums; }
 .pos { color: var(--green); }
 .neg { color: var(--red); }
+.muted { color: var(--ink-faint); }
 
 /* ---------- header ---------- */
 .topbar {
@@ -70,7 +73,6 @@ input, select { font: inherit; }
 .mainnav a:hover { background: rgba(255, 255, 255, .1); color: #fff; }
 .mainnav a.active { background: var(--amber); color: #2c2103; }
 .household-chip {
-  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -83,6 +85,22 @@ input, select { font: inherit; }
 .household-chip strong { font-size: 14px; }
 .household-chip small { font-size: 12px; color: #cfe0d4; }
 .chip-dot { width: 10px; height: 10px; border-radius: 50%; background: #7ed492; flex: none; }
+
+/* ---------- header preferences: language + theme ---------- */
+.prefs { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.seg { display: flex; border: 1px solid rgba(255, 255, 255, .28); border-radius: 999px; overflow: hidden; }
+.seg button {
+  background: transparent; border: 0; color: #d9e6dc;
+  padding: 6px 13px; font-weight: 700; font-size: 13.5px; letter-spacing: .04em;
+}
+.seg button.active { background: var(--amber); color: #2c2103; }
+.theme-btn {
+  width: 36px; height: 36px; border-radius: 50%; flex: none;
+  background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .28);
+  color: #f4efe3; font-size: 17px; line-height: 1;
+}
+.theme-btn:hover, .seg button:hover { background: rgba(255, 255, 255, .18); }
+.seg button.active:hover { background: var(--amber); }
 
 /* ---------- layout ---------- */
 main { max-width: 1160px; margin: 0 auto; padding: 26px 28px 40px; }
@@ -130,6 +148,9 @@ main { max-width: 1160px; margin: 0 auto; padding: 26px 28px 40px; }
 /* ---------- charts ---------- */
 .donut-wrap { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; }
 .donut-wrap svg { flex: none; }
+.donut-track { stroke: var(--paper-soft); }
+.donut-top { fill: var(--ink-soft); }
+.donut-bottom { fill: var(--ink); }
 .legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; min-width: 220px; }
 .legend li { display: flex; align-items: center; gap: 9px; font-size: 14.5px; }
 .legend .swatch { width: 12px; height: 12px; border-radius: 3px; flex: none; }
@@ -173,9 +194,9 @@ tr:last-child td { border-bottom: 0; }
 .field label { font-size: 13px; font-weight: 700; color: var(--ink-soft); }
 .field input, .field select {
   padding: 9px 11px;
-  border: 1px solid #cfc4ab;
+  border: 1px solid var(--field-line);
   border-radius: 9px;
-  background: #fff;
+  background: var(--field-bg);
   color: var(--ink);
   width: 100%;
 }
@@ -189,11 +210,11 @@ tr:last-child td { border-bottom: 0; }
   font-weight: 700;
 }
 .btn:hover { background: var(--green-deep); }
-.btn.ghost { background: #fff; color: var(--green); border: 1px solid var(--green); }
+.btn.ghost { background: var(--card); color: var(--green); border: 1px solid var(--green); }
 .btn.amber { background: var(--amber); color: #2c2103; }
 .btn.small { padding: 7px 12px; font-size: 14px; }
 .filter-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
-.filter-row select { padding: 8px 10px; border: 1px solid #cfc4ab; border-radius: 9px; background: #fff; }
+.filter-row select { padding: 8px 10px; border: 1px solid var(--field-line); border-radius: 9px; background: var(--field-bg); color: var(--ink); }
 .empty { color: var(--ink-soft); padding: 18px 4px; text-align: center; }
 
 /* ---------- goals / bills ---------- */
@@ -205,7 +226,7 @@ tr:last-child td { border-bottom: 0; }
 .goal .bar-track { height: 14px; margin: 8px 0 6px; }
 .goal .goal-note { font-size: 13.5px; color: var(--ink-soft); }
 .goal .goal-actions { margin-top: 8px; display: flex; gap: 8px; align-items: center; }
-.goal .goal-actions input { width: 130px; padding: 7px 10px; border: 1px solid #cfc4ab; border-radius: 8px; }
+.goal .goal-actions input { width: 130px; padding: 7px 10px; border: 1px solid var(--field-line); border-radius: 8px; background: var(--field-bg); color: var(--ink); }
 .bill-row { display: flex; align-items: center; gap: 14px; padding: 11px 2px; border-bottom: 1px solid var(--line); }
 .bill-row:last-child { border-bottom: 0; }
 .bill-row .bill-name { flex: 1; min-width: 0; }
@@ -243,6 +264,36 @@ tr:last-child td { border-bottom: 0; }
 }
 .sitefoot p { margin: 6px 0; }
 .linklike { background: none; border: 0; padding: 0; color: var(--green); text-decoration: underline; font-size: inherit; }
+
+/* ---------- dark theme ---------- */
+/* Same tokens, night values. The header keeps its deep green; the
+   accent KPI keeps the brand green block; tinted pills get light text
+   because their green-deep foreground was chosen for light tints. */
+[data-theme="dark"] {
+  --paper: #131915;
+  --paper-soft: #222a24;
+  --card: #1b221d;
+  --ink: #ede8db;
+  --ink-soft: #aeb9b1;
+  --ink-faint: #86917f;
+  --line: #333e35;
+  --green: #4fb286;
+  --green-deep: #0a2a20;
+  --green-soft: #264636;
+  --amber: #eda93f;
+  --amber-soft: #4a3812;
+  --terra: #dd8a63;
+  --red: #e0705c;
+  --red-soft: #4a2a22;
+  --field-bg: #222a24;
+  --field-line: #46524a;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 6px 18px rgba(0, 0, 0, .3);
+}
+[data-theme="dark"] .cat-pill { color: #bfe6d2; }
+[data-theme="dark"] .due-pill.paid { color: #bfe6d2; }
+[data-theme="dark"] .due-pill.soon { color: #f3cd85; }
+[data-theme="dark"] .kpi.accent { background: #14523f; border-color: #14523f; }
+.bar-note input { background: var(--field-bg); color: var(--ink); }
 
 /* ---------- phone ---------- */
 @media (max-width: 860px) {

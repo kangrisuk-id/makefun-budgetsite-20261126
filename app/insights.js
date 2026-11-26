@@ -4,6 +4,8 @@
 
 import { HOUSEHOLD } from "./data.js";
 import { expenseTotal, incomeTotal, savingsTotal, spendingByCategory, ruleSplit } from "./state.js";
+import { money } from "./format.js";
+import { t, catName } from "./i18n.js";
 
 export function monthlyInsights(state) {
   const income = incomeTotal(state);
@@ -32,28 +34,32 @@ export function monthlyInsights(state) {
   if (split.unassigned > 0) {
     const toTwenty = Math.max(0, Math.round(income * 0.2 - saved));
     tips.push({
-      title: `Move ${toTwenty > 0 ? `$${toTwenty.toLocaleString("en-US")} to savings` : "the unassigned cash to a goal"}`,
+      title: toTwenty > 0 ? t("tip1.titleMove", { amount: money(toTwenty) }) : t("tip1.titleRest"),
       body: toTwenty > 0
-        ? `Savings sit at ${savingsRate.toFixed(1)}% of income; the 20% rule wants $${Math.round(income * 0.2).toLocaleString("en-US")}. $${split.unassigned.toLocaleString("en-US")} is still unassigned this month — moving $${toTwenty.toLocaleString("en-US")} of it closes the gap without touching any budget.`
-        : `$${split.unassigned.toLocaleString("en-US")} is still unassigned this month. Give it a job — a goal contribution or next month's buffer — before it drifts into spending.`,
+        ? t("tip1.bodyMove", { rate: savingsRate.toFixed(1), want: money(Math.round(income * 0.2)), unassigned: money(split.unassigned), amount: money(toTwenty) })
+        : t("tip1.bodyRest", { unassigned: money(split.unassigned) }),
     });
   }
   if (overBudget.length > 0) {
-    const names = overBudget.map((c) => c.name).join(" and ");
+    const names = overBudget.map((c) => catName(c)).join(t("common.and"));
     tips.push({
-      title: `${names} ${overBudget.length > 1 ? "are" : "is"} over budget`,
-      body: overBudget.map((c) => `${c.name} is $${Math.round(c.spent - c.budget)} over its $${c.budget} budget`).join("; ") + ". Raise the budget to the honest number, or move the difference from a category with room — guessing low every month is how budgets stop being trusted.",
+      title: t("tip2.title", { names, plural: overBudget.length > 1 }),
+      body: overBudget.map((c) => t("tip2.each", { name: catName(c), over: money(Math.round(c.spent - c.budget)), budget: money(c.budget) })).join("; ") + t("tip2.tail"),
     });
   }
   if (upcomingBills > 0) {
     tips.push({
-      title: `$${upcomingBills.toLocaleString("en-US")} of bills are still due`,
-      body: `Car insurance ($118) lands on Nov 28. It is already covered by the unassigned cash, so pay it on the day and tick it off on the Bills page — no surprise, no late fee.`,
+      title: t("tip3.title", { amount: money(upcomingBills) }),
+      body: t("tip3.body", { amount: money(118) }),
     });
   }
   tips.push({
-    title: "Groceries are the lever, not dining out",
-    body: `Groceries are the biggest flexible spend at $${Math.round(topFlexible ? topFlexible.spent : 0).toLocaleString("en-US")} this month — about $${Math.round((topFlexible ? topFlexible.spent : 0) / daysElapsed)} a day. One planned shop a week instead of top-ups is usually worth $40–$60 a month for a family this size, more than skipping every coffee run.`,
+    title: t("tip4.title"),
+    body: t("tip4.body", {
+      total: money(Math.round(topFlexible ? topFlexible.spent : 0)),
+      perDay: money(Math.round((topFlexible ? topFlexible.spent : 0) / daysElapsed)),
+      range: `${money(40)}–${money(60)}`,
+    }),
   });
 
   return {
